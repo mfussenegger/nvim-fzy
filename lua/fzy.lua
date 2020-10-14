@@ -2,10 +2,14 @@ local api = vim.api
 local vfn = vim.fn
 local M = {}
 
+local function fst(xs)
+  return xs and xs[1] or nil
+end
+
 
 local function popup()
   local buf = api.nvim_create_buf(false, true)
-  api.nvim_buf_set_keymap(buf, 'i', '<esc>', ':bd', {})
+  api.nvim_buf_set_keymap(buf, 't', '<ESC>', '<C-\\><C-c>', {})
   local columns = api.nvim_get_option('columns')
   local lines = api.nvim_get_option('lines')
   local width = vfn.float2nr(columns * 0.9)
@@ -23,11 +27,83 @@ local function popup()
 end
 
 
-M.actions = {}
-function M.actions.edit_file(selection)
+local sinks = {}
+M.sinks = sinks
+function sinks.edit_file(selection)
   if selection then
     vim.cmd('e ' .. selection)
   end
+end
+
+
+function sinks.edit_buf(buf_with_name)
+  if buf_with_name then
+    local parts = vim.split(buf_with_name, ':')
+    local bufnr = parts[1]
+    api.nvim_set_current_buf(bufnr)
+  end
+end
+
+
+local choices = {}
+
+function choices.from_list(xs)
+  return 'echo "' .. table.concat(xs, '\n') .. '"'
+end
+
+function choices.buffers()
+  local bufs = api.nvim_list_bufs()
+  return choices.from_list(vim.tbl_map(
+    function(b)
+      local bufname = vfn.fnamemodify(api.nvim_buf_get_name(b), ':.')
+      return string.format('%d: %s', b, bufname)
+    end,
+    bufs
+  ))
+end
+
+
+M.actions = {}
+function M.actions.buffers()
+  M.execute(choices.buffers(), sinks.edit_buf, 'Buffers> ')
+end
+
+function M.actions.buf_tags()
+  local bufname = api.nvim_buf_get_name(0)
+  assert(vfn.filereadable(bufname), 'File to generate tags for must be readable')
+  local output = vfn.system({
+    'ctags',
+    '-f',
+    '-',
+    '--sort=yes',
+    '--excmd=number',
+    '--language-force=' .. api.nvim_buf_get_option(0, 'filetype'),
+    bufname
+  })
+  local lines = vim.split(output, '\n')
+  local tags = vim.tbl_map(function(x) return vim.split(x, '\t') end, lines)
+  M.execute(
+    choices.from_list(vim.tbl_map(fst, tags)),
+    function(selection)
+      for _, tag in ipairs(tags) do
+        if vim.trim(selection) == vim.trim(tag[1]) then
+          local row = tonumber(vim.split(tag[3], ';')[1])
+          api.nvim_win_set_cursor(0, {row, 0})
+          vim.cmd('normal! zvzz')
+        end
+      end
+    end,
+    'Buffer Tags> '
+  )
+end
+
+
+function M.from_list(items, on_selection, prompt)
+  M.execute(
+    choices.from_list(items),
+    on_selection,
+    prompt
+  )
 end
 
 
