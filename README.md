@@ -1,2 +1,6 @@
 # nvim-fzy
-Like fzf.vim but for fzy and neovim with Lua API
+
+Like [fzf.vim](https://github.com/junegunn/fzf.vim) but for [fzy](https://github.com/jhawthorn/fzy) and neovim with Lua API.
+
+
+
