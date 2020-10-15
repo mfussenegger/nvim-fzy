@@ -12,13 +12,13 @@ local function popup()
   api.nvim_buf_set_keymap(buf, 't', '<ESC>', '<C-\\><C-c>', {})
   local columns = api.nvim_get_option('columns')
   local lines = api.nvim_get_option('lines')
-  local width = vfn.float2nr(columns * 0.9)
-  local height = vfn.float2nr(lines * 0.8)
+  local width = math.floor(columns * 0.9)
+  local height = math.floor(lines * 0.8)
   local opts = {
     relative = 'editor',
     style = 'minimal',
-    row = vfn.float2nr((lines - height) * 0.5),
-    col = vfn.float2nr((columns - width) * 0.5),
+    row = math.floor((lines - height) * 0.5),
+    col = math.floor((columns - width) * 0.5),
     width = width,
     height = height
   }
