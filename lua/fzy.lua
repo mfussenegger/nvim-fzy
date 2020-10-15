@@ -30,7 +30,7 @@ end
 local sinks = {}
 M.sinks = sinks
 function sinks.edit_file(selection)
-  if selection then
+  if selection and vim.trim(selection) ~= '' then
     vim.cmd('e ' .. selection)
   end
 end
@@ -85,7 +85,7 @@ function M.actions.buf_tags()
   M.execute(
     choices.from_list(vim.tbl_map(fst, tags)),
     function(selection)
-      if not selection then
+      if not selection or vim.trim(selection) == '' then
         return
       end
       for _, tag in ipairs(tags) do
