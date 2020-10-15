@@ -85,6 +85,9 @@ function M.actions.buf_tags()
   M.execute(
     choices.from_list(vim.tbl_map(fst, tags)),
     function(selection)
+      if not selection then
+        return
+      end
       for _, tag in ipairs(tags) do
         if vim.trim(selection) == vim.trim(tag[1]) then
           local row = tonumber(vim.split(tag[3], ';')[1])
