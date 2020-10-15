@@ -83,19 +83,17 @@ function M.actions.buf_tags()
   })
   local lines = vim.split(output, '\n')
   local tags = vim.tbl_map(function(x) return vim.split(x, '\t') end, lines)
-  M.execute(
-    choices.from_list(vim.tbl_map(fst, tags)),
-    function(selection)
-      if not selection or vim.trim(selection) == '' then
+  M.pick_one(
+    tags,
+    'Buffer Tags> ',
+    fst,
+    function(tag)
+      if not tag or vim.trim(tag[1]) == '' then
         return
       end
-      for _, tag in ipairs(tags) do
-        if vim.trim(selection) == vim.trim(tag[1]) then
-          local row = tonumber(vim.split(tag[3], ';')[1])
-          api.nvim_win_set_cursor(0, {row, 0})
-          vim.cmd('normal! zvzz')
-        end
-      end
+      local row = tonumber(vim.split(tag[3], ';')[1])
+      api.nvim_win_set_cursor(0, {row, 0})
+      vim.cmd('normal! zvzz')
     end,
     'Buffer Tags> '
   )
@@ -106,7 +104,7 @@ function M.pick_one(items, prompt, label_fn, cb)
   local labels = {}
   label_fn = label_fn or vim.inspect
   for i, item in ipairs(items) do
-    table.insert(labels, string.format('%d ¦ %s', i, label_fn(item)))
+    table.insert(labels, string.format('%03d ¦ %s', i, label_fn(item)))
   end
   M.execute(
     choices.from_list(labels),
