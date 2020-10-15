@@ -101,10 +101,23 @@ function M.actions.buf_tags()
 end
 
 
-function M.from_list(items, on_selection, prompt)
+function M.pick_one(items, prompt, label_fn, cb)
+  local labels = {}
+  label_fn = label_fn or vim.inspect
+  for i, item in ipairs(items) do
+    table.insert(labels, string.format('%d ¦ %s', i, label_fn(item)))
+  end
   M.execute(
-    choices.from_list(items),
-    on_selection,
+    choices.from_list(labels),
+    function(selection)
+      if not selection or vim.trim(selection) == '' then
+        cb(nil)
+      else
+        local parts = vim.split(selection, ' ¦ ')
+        local idx = tonumber(parts[1])
+        cb(items[idx])
+      end
+    end,
     prompt
   )
 end
