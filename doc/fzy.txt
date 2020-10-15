@@ -1,0 +1,73 @@
+*fzy.txt* Neovim frontend for the fzy fuzzy finder
+
+nvim-fzy provides a few methods to switch to files, buffers or search tags
+using the fzy fuzzy finder.
+
+It also provides a Lua API to easily customize sources and actions.
+
+
+
+                                      Type |gO| to see the table of contents.
+==============================================================================
+API                                                                    *fzy-api*
+
+
+
+execute({choices_cmd}, {on_selection}, {prompt})                  *fzy.execute()*
+
+      This is the low-level API. It invokes the choices_cmd and opens a popup
+      running fzy so that the user can make a selection.
+
+
+      Parameters:
+          {choices_cmd}   A shell command that must output newline separated
+                          entries that form the choices.
+          {on_selection}  A callback that is invoked with either `nil` if
+                          the user cancelled the action, or the selection the
+                          user made.
+          {prompt}        Prompt text displayed in the popup.
+
+
+pick_one({items}, {prompt}, {label_fn}, {cb})                    *fzy.pick_one()*
+
+      Slightly higher level API. It takes a list of arbitrary items and a
+      function to render the items to the user.
+
+      The callback (`cb`) will receive the choice the user made or `nil`
+
+      Parameters:
+          {items}     A table (array) of arbitrary items
+          {prompt}    Prompt text displayed to the user in the selection popup.
+          {label_fn}  A function which will be called with an item from
+                      {items} as argument and must return a text.
+                      The text is what the user will see when prompted to make
+                      a choice.
+                      Can be `nil` in which case |vim.inspect()| will be used to
+                      render the item.
+          {cb}        Callback that will be invoked with the choice, or `nil`
+                      if the user aborted.
+
+
+actions.buffers()                                         *fzy.actions.buffers()*
+
+      Prompts the user with all loaded buffers, once a choice is made the
+      selected buffer will be opened in the current buffer.
+
+
+actions.buf_tags()                                      *fzy.actions.buf_ctags()*
+
+
+      Runs ctags on the current buffer and prompts the user with all generated
+      tags. Once a choice is made it will navigate to the chosen tag.
+
+
+sinks.edit_file                                           *fzy.sinks.edit_file*
+
+
+      A callback that can be used with |fzy.execute()|. It invokes `:e` on the
+      selection.
+
+      Example usage:
+      >
+          fzy.execute('git ls-files', fzy.sinks.edit_file)
+

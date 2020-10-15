@@ -23,6 +23,9 @@ nnoremap <silent><leader>ft :lua fzy.actions.buf_tags()<CR>
 nnoremap <silent><leader>fg :lua fzy.execute('git ls-files', fzy.sinks.edit_file)<CR>
 ```
 
+
+See `:help fzy` for more information
+
 Enjoy
 
 
