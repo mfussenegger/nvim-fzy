@@ -64,9 +64,56 @@ function choices.buffers()
 end
 
 
+function M.try(f1, f2)
+  local ok, _ = pcall(f1)
+  if not ok then
+    f2()
+  end
+end
+
+
 M.actions = {}
 function M.actions.buffers()
   M.execute(choices.buffers(), sinks.edit_buf, 'Buffers> ')
+end
+
+function M.actions.lsp_tags()
+  local params = vim.lsp.util.make_position_params()
+  params.context = {
+    includeDeclaration = true
+  }
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
+  vim.lsp.buf_request(0, 'textDocument/documentSymbol', params, function(err, _, result)
+    assert(not err, vim.inspect(err))
+    if not result then
+      return
+    end
+    local items = {}
+    local add_items = nil
+    add_items = function(xs)
+      for _, x in ipairs(xs) do
+        table.insert(items, x)
+        if x.children then
+          add_items(x.children)
+        end
+      end
+    end
+    add_items(result)
+    M.pick_one(
+      items,
+      'Tags> ',
+      function(item) return string.format('[%s] %s', vim.lsp.protocol.SymbolKind[item.kind], item.name) end,
+      function(item)
+        if not item then return end
+        local range = item.range or item.location.range
+        api.nvim_win_set_cursor(0, {
+          range.start.line + 1,
+          range.start.character
+        })
+        vim.cmd('normal! zvzz')
+      end
+    )
+  end)
 end
 
 function M.actions.buf_tags()
