@@ -29,6 +29,20 @@ See `:help fzy` for more information
 Enjoy
 
 
+## Goals
+
+- Have a simple API so people can create their custom actions.
+- No unnecessary bells and whistles - get the job done.
+- Include the essentials, but not much more than that.
+
+
+## Alternatives
+
+- [fzf.vim][1]
+- [telescope.nvim][4]
+
+
 [1]: https://github.com/junegunn/fzf.vim
 [2]: https://github.com/jhawthorn/fzy
 [3]: https://github.com/neovim/neovim/releases/tag/nightly
+[4]: https://github.com/nvim-lua/telescope.nvim
