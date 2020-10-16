@@ -48,7 +48,7 @@ pick_one({items}, {prompt}, {label_fn}, {cb})                    *fzy.pick_one()
                       if the user aborted.
 
 
-actions.buffers()                                         *fzy.actions.buffers()*
+actions.buffers()                                        *fzy.actions.buffers()*
 
       Prompts the user with all loaded buffers, once a choice is made the
       selected buffer will be opened in the current buffer.
@@ -59,6 +59,21 @@ actions.buf_tags()                                      *fzy.actions.buf_ctags()
 
       Runs ctags on the current buffer and prompts the user with all generated
       tags. Once a choice is made it will navigate to the chosen tag.
+
+
+actions.lsp_tags()                                      *fzy.actions.lsp_tags()*
+
+      Retrieves tags for the current buffer using the built-in LSP client.
+      Navigates to the selected symbol.
+
+
+try(...)                                                             *fzy.try()*
+
+      Takes a list of function references and invokes them until the first succeeds.
+
+      An example use case is `fzy.try(fzy.actions.lsp_tags, fzy.actions.buf_tags)`
+      It first tries to use `lsp_tags`, but if it fails - for example because
+      no LSP client/server is available - it falls back to ctags.
 
 
 sinks.edit_file                                           *fzy.sinks.edit_file*

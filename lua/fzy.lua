@@ -64,10 +64,12 @@ function choices.buffers()
 end
 
 
-function M.try(f1, f2)
-  local ok, _ = pcall(f1)
-  if not ok then
-    f2()
+function M.try(...)
+  for _,fn in ipairs({...}) do
+    local ok, _ = pcall(fn)
+    if ok then
+      return
+    end
   end
 end
 
