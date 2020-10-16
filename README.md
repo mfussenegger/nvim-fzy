@@ -26,6 +26,8 @@ nnoremap <silent><leader>fg :lua fzy.execute('git ls-files', fzy.sinks.edit_file
 
 See `:help fzy` for more information
 
+![demo](demo/demo.gif)
+
 Enjoy
 
 
