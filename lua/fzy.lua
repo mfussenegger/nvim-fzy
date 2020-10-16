@@ -119,7 +119,7 @@ end
 function M.actions.buf_tags()
   local bufname = api.nvim_buf_get_name(0)
   assert(vfn.filereadable(bufname), 'File to generate tags for must be readable')
-  local output = vfn.system({
+  local ok, output = pcall(vfn.system, {
     'ctags',
     '-f',
     '-',
@@ -128,14 +128,20 @@ function M.actions.buf_tags()
     '--language-force=' .. api.nvim_buf_get_option(0, 'filetype'),
     bufname
   })
-  local lines = vim.split(output, '\n')
+  if not ok or api.nvim_get_vvar('shell_error') ~= 0 then
+    output = vfn.system({'ctags', '-f', '-', '--sort=yes', '--excmd=number', bufname})
+  end
+  local lines = vim.tbl_filter(
+    function(x) return x ~= '' end,
+    vim.split(output, '\n')
+  )
   local tags = vim.tbl_map(function(x) return vim.split(x, '\t') end, lines)
   M.pick_one(
     tags,
     'Buffer Tags> ',
     fst,
     function(tag)
-      if not tag or vim.trim(tag[1]) == '' then
+      if not tag then
         return
       end
       local row = tonumber(vim.split(tag[3], ';')[1])
