@@ -160,6 +160,27 @@ function M.actions.buf_tags()
 end
 
 
+function M.actions.quickfix()
+  vim.cmd('cclose')
+  local items = vfn.getqflist()
+  M.pick_one(
+    items,
+    'Quickfix> ',
+    function(item)
+      local bufname = vfn.fnamemodify(api.nvim_buf_get_name(item.bufnr), ':t')
+      return bufname .. ': ' .. item.text
+    end,
+    function(item)
+      if not item then return end
+      vfn.bufload(item.bufnr)
+      api.nvim_win_set_buf(0, item.bufnr)
+      api.nvim_win_set_cursor(0, {item.lnum, item.col - 1})
+      vim.cmd('normal! zvzz')
+    end
+  )
+end
+
+
 function M.pick_one(items, prompt, label_fn, cb)
   local labels = {}
   label_fn = label_fn or vim.inspect

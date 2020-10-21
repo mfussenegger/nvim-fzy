@@ -67,6 +67,12 @@ actions.lsp_tags()                                      *fzy.actions.lsp_tags()*
       Navigates to the selected symbol.
 
 
+actions.quickfix()                                      *fzy.actions.quickfix()*
+
+      Opens the items from the quickfix list.
+      Navigates to the selected item.
+
+
 try(...)                                                             *fzy.try()*
 
       Takes a list of function references and invokes them until the first succeeds.
