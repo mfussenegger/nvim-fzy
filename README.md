@@ -15,7 +15,7 @@ Like [fzf.vim][1] but for [fzy][2] and neovim with Lua API.
 
 Create some mappings like this:
 
-```
+```vimL
 lua fzy = require('fzy')
 nnoremap <silent><leader>ff :lua fzy.execute('fd', fzy.sinks.edit_file)<CR>
 nnoremap <silent><leader>fb :lua fzy.actions.buffers()<CR>
