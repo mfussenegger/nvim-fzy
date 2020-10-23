@@ -37,35 +37,8 @@ function sinks.edit_file(selection)
 end
 
 
-function sinks.edit_buf(buf_with_name)
-  if buf_with_name then
-    local parts = vim.split(buf_with_name, ':')
-    local bufnr = parts[1]
-    api.nvim_set_current_buf(bufnr)
-  end
-end
-
-
-local choices = {}
-
-function choices.from_list(xs)
+local function mk_echo(xs)
   return 'echo "' .. table.concat(xs, '\n') .. '"'
-end
-
-function choices.buffers()
-  local bufs = vim.tbl_filter(
-    function(b)
-      return api.nvim_buf_is_loaded(b) and api.nvim_buf_get_option(b, 'buftype') ~= 'quickfix'
-    end,
-    api.nvim_list_bufs()
-  )
-  return choices.from_list(vim.tbl_map(
-    function(b)
-      local bufname = vfn.fnamemodify(api.nvim_buf_get_name(b), ':.')
-      return string.format('%d: %s', b, bufname)
-    end,
-    bufs
-  ))
 end
 
 
@@ -80,9 +53,33 @@ end
 
 
 M.actions = {}
+
+
 function M.actions.buffers()
-  M.execute(choices.buffers(), sinks.edit_buf, 'Buffers> ')
+  local bufs = vim.tbl_filter(
+    function(b)
+      return api.nvim_buf_is_loaded(b) and api.nvim_buf_get_option(b, 'buftype') ~= 'quickfix'
+    end,
+    api.nvim_list_bufs()
+  )
+  local format_bufname = function(b)
+    local fullname = api.nvim_buf_get_name(b)
+    local name
+    if #fullname == 0 then
+      name = '[No Name] (' .. api.nvim_buf_get_option(b, 'buftype') .. ')'
+    else
+      name = vfn.fnamemodify(fullname, ':.')
+    end
+    local modified = api.nvim_buf_get_option(b, 'modified')
+    return modified and name .. ' [+]' or name
+  end
+  M.pick_one(bufs, 'Buffers> ', format_bufname, function(b)
+    if b then
+      api.nvim_set_current_buf(b)
+    end
+  end)
 end
+
 
 function M.actions.lsp_tags()
   local params = vim.lsp.util.make_position_params()
@@ -188,7 +185,7 @@ function M.pick_one(items, prompt, label_fn, cb)
     table.insert(labels, string.format('%03d ¦ %s', i, label_fn(item)))
   end
   M.execute(
-    choices.from_list(labels),
+    mk_echo(labels),
     function(selection)
       if not selection or vim.trim(selection) == '' then
         cb(nil)
