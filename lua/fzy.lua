@@ -38,7 +38,7 @@ end
 
 
 local function mk_echo(xs)
-  return 'echo "' .. table.concat(xs, '\n') .. '"'
+  return 'echo ' .. vim.fn.shellescape(table.concat(xs, '\n'))
 end
 
 
@@ -151,8 +151,7 @@ function M.actions.buf_tags()
       local row = tonumber(vim.split(tag[3], ';')[1])
       api.nvim_win_set_cursor(0, {row, 0})
       vim.cmd('normal! zvzz')
-    end,
-    'Buffer Tags> '
+    end
   )
 end
 
