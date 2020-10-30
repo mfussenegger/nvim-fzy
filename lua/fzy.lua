@@ -180,8 +180,10 @@ end
 function M.pick_one(items, prompt, label_fn, cb)
   local labels = {}
   label_fn = label_fn or vim.inspect
+  local num_digits = math.floor(math.log(math.abs(#items), 10) + 1)
+  local digit_fmt = '%0' .. tostring(num_digits) .. 'd'
   for i, item in ipairs(items) do
-    table.insert(labels, string.format('%03d ¦ %s', i, label_fn(item)))
+    table.insert(labels, string.format(digit_fmt .. ' ¦ %s', i, label_fn(item)))
   end
   M.execute(
     mk_echo(labels),
