@@ -37,11 +37,6 @@ function sinks.edit_file(selection)
 end
 
 
-local function mk_echo(xs)
-  return 'echo ' .. vim.fn.shellescape(table.concat(xs, '\n'))
-end
-
-
 function M.try(...)
   for _,fn in ipairs({...}) do
     local ok, _ = pcall(fn)
@@ -178,16 +173,15 @@ end
 
 
 function M.pick_one(items, prompt, label_fn, cb)
-  local labels = {}
   label_fn = label_fn or vim.inspect
   local num_digits = math.floor(math.log(math.abs(#items), 10) + 1)
   local digit_fmt = '%0' .. tostring(num_digits) .. 'd'
-  for i, item in ipairs(items) do
-    table.insert(labels, string.format(digit_fmt .. ' ¦ %s', i, label_fn(item)))
-  end
+  local inputs = vfn.tempname()
+  vfn.system(string.format('mkfifo "%s"', inputs))
   M.execute(
-    mk_echo(labels),
+    string.format('cat "%s"', inputs),
     function(selection)
+      os.remove(inputs)
       if not selection or vim.trim(selection) == '' then
         cb(nil)
       else
@@ -198,6 +192,14 @@ function M.pick_one(items, prompt, label_fn, cb)
     end,
     prompt
   )
+  vim.cmd('startinsert!')
+  local f = io.open(inputs, 'a')
+  for i, item in ipairs(items) do
+    local label = string.format(digit_fmt .. ' ¦ %s', i, label_fn(item))
+    f:write(label .. '\n')
+  end
+  f:flush()
+  f:close()
 end
 
 
@@ -207,10 +209,10 @@ function M.execute(choices_cmd, on_selection, prompt)
   local shellcmdflag = api.nvim_get_option('shellcmdflag')
   local popup_win, _, popup_opts = popup()
   local fzy = (prompt
-    and string.format(' | fzy -l %d -p "%s" >', popup_opts.height, prompt)
-    or string.format(' | fzy -l %d > ', popup_opts.height)
+    and string.format('%s | fzy -l %d -p "%s" > "%s"', choices_cmd, popup_opts.height, prompt, tmpfile)
+    or string.format('%s | fzy -l %d > "%s"', choices_cmd, popup_opts.height, tmpfile)
   )
-  local args = {shell, shellcmdflag, choices_cmd .. fzy.. tmpfile}
+  local args = {shell, shellcmdflag, fzy}
   vfn.termopen(args, {
     on_exit = function()
       api.nvim_win_close(popup_win, true)
