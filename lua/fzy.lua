@@ -21,7 +21,8 @@ local function popup()
     row = math.floor((lines - height) * 0.5),
     col = math.floor((columns - width) * 0.5),
     width = width,
-    height = height
+    height = height,
+    border = 'single',
   }
   local win = api.nvim_open_win(buf, true, opts)
   return win, buf, opts
