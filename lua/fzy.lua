@@ -51,6 +51,18 @@ end
 M.actions = {}
 
 
+function M.actions.buf_lines()
+  local lines = api.nvim_buf_get_lines(0, 0, -1, true)
+  local win = api.nvim_get_current_win()
+  M.pick_one(lines, 'Lines> ', function(x) return x end, function(result, idx)
+    if result then
+      api.nvim_win_set_cursor(win, {idx, 0})
+      vim.cmd('normal! zvzz')
+    end
+  end)
+end
+
+
 function M.actions.buffers()
   local bufs = vim.tbl_filter(
     function(b)
@@ -175,7 +187,7 @@ end
 
 function M.pick_one(items, prompt, label_fn, cb)
   label_fn = label_fn or vim.inspect
-  local num_digits = math.floor(math.log(math.abs(#items), 10) + 1)
+  local num_digits = math.floor(math.log(math.abs(#items)) + 1)
   local digit_fmt = '%0' .. tostring(num_digits) .. 'd'
   local inputs = vfn.tempname()
   vfn.system(string.format('mkfifo "%s"', inputs))
@@ -188,7 +200,7 @@ function M.pick_one(items, prompt, label_fn, cb)
       else
         local parts = vim.split(selection, ' ¦ ')
         local idx = tonumber(parts[1])
-        cb(items[idx])
+        cb(items[idx], idx)
       end
     end,
     prompt
