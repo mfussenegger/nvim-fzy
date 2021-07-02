@@ -38,6 +38,12 @@ function sinks.edit_file(selection)
 end
 
 
+-- Return a formatted path or name for a bufnr
+function M.format_bufname(bufnr)
+  return vfn.fnamemodify(api.nvim_buf_get_name(bufnr), ':.')
+end
+
+
 function M.try(...)
   for _,fn in ipairs({...}) do
     local ok, _ = pcall(fn)
@@ -76,7 +82,7 @@ function M.actions.buffers()
     if #fullname == 0 then
       name = '[No Name] (' .. api.nvim_buf_get_option(b, 'buftype') .. ')'
     else
-      name = vfn.fnamemodify(fullname, ':.')
+      name = M.format_bufname(b)
     end
     local modified = api.nvim_buf_get_option(b, 'modified')
     return modified and name .. ' [+]' or name
@@ -171,8 +177,7 @@ function M.actions.quickfix()
     items,
     'Quickfix> ',
     function(item)
-      local bufname = vfn.fnamemodify(api.nvim_buf_get_name(item.bufnr), ':t')
-      return bufname .. ': ' .. item.text
+      return M.format_bufname(item.bufnr) .. ': ' .. item.text
     end,
     function(item)
       if not item then return end
