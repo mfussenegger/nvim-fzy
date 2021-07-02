@@ -5,10 +5,11 @@ Like [fzf.vim][1] but for [fzy][2] and neovim with Lua API.
 
 ## Installation
 
-- Requires [Neovim HEAD/nightly][3]
+- Requires Neovim >= 0.5
 - Install [fzy][2] and make sure it is in your `$PATH`.
-- nvim-fzy is a plugin. Install it like any other plugin.
-- Call `packadd nvim-fzy` if you install `nvim-fzy` to `'packpath'`.
+- nvim-fzy is a plugin. Install it like any other plugin:
+  - If using [vim-plug][5]: `Plug 'mfussenegger/nvim-fzy'`
+  - If using [packer.nvim][6]: `use 'mfussenegger/nvim-fzy'`
 
 
 ## Usage
@@ -36,8 +37,10 @@ Enjoy
 ## Goals
 
 - Have a simple API so people can create their custom actions.
-- No unnecessary bells and whistles - get the job done.
 - Include the essentials, but not much more than that.
+
+This plugin is pretty much *done* and won't see feature additions, unless there
+is a convincing case to be made.
 
 
 ## Alternatives
@@ -48,5 +51,6 @@ Enjoy
 
 [1]: https://github.com/junegunn/fzf.vim
 [2]: https://github.com/jhawthorn/fzy
-[3]: https://github.com/neovim/neovim/releases/tag/nightly
 [4]: https://github.com/nvim-lua/telescope.nvim
+[5]: https://github.com/junegunn/vim-plug
+[6]: https://github.com/wbthomason/packer.nvim
