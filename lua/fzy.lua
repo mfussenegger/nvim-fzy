@@ -95,6 +95,38 @@ function M.actions.buffers()
 end
 
 
+function M.actions.jumplist()
+  local locations = vim.fn.getjumplist()[1]
+  M.pick_one(
+    locations,
+    'Jumplist> ',
+    function(loc) return M.format_bufname(loc.bufnr) end,
+    function(loc)
+      if loc then
+        api.nvim_set_current_buf(loc.bufnr)
+      end
+    end
+  )
+end
+
+
+function M.actions.tagstack()
+  local stack = vim.fn.gettagstack()
+  M.pick_one(
+    stack.items or {},
+    'Tagstack> ',
+    function(loc) return M.format_bufname(loc.bufnr) .. ': ' .. loc.tagname end,
+    function(loc)
+      if loc then
+        api.nvim_set_current_buf(loc.bufnr)
+        api.nvim_win_set_cursor(0, { loc.from[2], loc.from[3] })
+        vim.cmd('normal! zvzz')
+      end
+    end
+  )
+end
+
+
 function M.actions.lsp_tags()
   local params = vim.lsp.util.make_position_params()
   params.context = {

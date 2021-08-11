@@ -73,6 +73,18 @@ actions.quickfix()                                      *fzy.actions.quickfix()*
       Navigates to the selected item.
 
 
+actions.jumplist()                                      *fzy.actions.jumplist()*
+
+      Lists the buffers from the jumplist.
+      On selection it navigates to the selected buffer.
+
+
+actions.tagstack()                                      *fzy.actions.tagstack()*
+
+      Lists the buffers from the tagstack.
+      On selection it navigates to the selected item.
+
+
 try(...)                                                             *fzy.try()*
 
       Takes a list of function references and invokes them until the first succeeds.
