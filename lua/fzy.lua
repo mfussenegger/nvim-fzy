@@ -265,7 +265,8 @@ function M.execute(choices_cmd, on_selection, prompt)
   local args = {shell, shellcmdflag, fzy}
   vfn.termopen(args, {
     on_exit = function()
-      api.nvim_win_close(popup_win, true)
+      -- popup could already be gone if user closes it manually; Ignore that case
+      pcall(api.nvim_win_close, popup_win, true)
       local file = io.open(tmpfile)
       if file then
         local contents = file:read("*all")
