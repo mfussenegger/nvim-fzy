@@ -48,6 +48,11 @@ pick_one({items}, {prompt}, {label_fn}, {cb})                    *fzy.pick_one()
                       if the user aborted.
 
 
+setup()                                                            *fzy.setup()*
+
+      Changes `vim.ui.select` to use fzy. Requires Neovim 0.6+
+
+
 actions.buffers()                                        *fzy.actions.buffers()*
 
       Prompts the user with all loaded buffers, once a choice is made the

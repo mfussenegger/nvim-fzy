@@ -303,4 +303,12 @@ function M.execute(choices_cmd, on_selection, prompt)
 end
 
 
+function M.setup()
+  if vim.ui then
+    function vim.ui.select(items, opts, on_choice)  -- luacheck: ignore 122
+      M.pick_one(items, opts.prompt, opts.format_item, on_choice)
+    end
+  end
+end
+
 return M
