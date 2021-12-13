@@ -127,34 +127,13 @@ function M.actions.tagstack()
 end
 
 
-local function mk_handler(fn)
-  return function(...)
-    local count = select('#', ...)
-    local config_or_client_id = select(4, ...)
-    local is_new = type(config_or_client_id) ~= 'number' or count == 4
-    if is_new then
-      fn(...)
-    else
-      local err = select(1, ...)
-      local method = select(2, ...)
-      local result = select(3, ...)
-      local client_id = select(4, ...)
-      local bufnr = select(5, ...)
-      local config = select(6, ...)
-      fn(err, result, { method = method, client_id = client_id, bufnr = bufnr }, config)
-    end
-  end
-end
-
-
-
 function M.actions.lsp_tags()
   local params = vim.lsp.util.make_position_params()
   params.context = {
     includeDeclaration = true
   }
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
-  vim.lsp.buf_request(0, 'textDocument/documentSymbol', params, mk_handler(function(err, result)
+  vim.lsp.buf_request(0, 'textDocument/documentSymbol', params, function(err, result)
     assert(not err, vim.inspect(err))
     if not result then
       return
@@ -184,7 +163,7 @@ function M.actions.lsp_tags()
         vim.cmd('normal! zvzz')
       end
     )
-  end))
+  end)
 end
 
 function M.actions.buf_tags()
