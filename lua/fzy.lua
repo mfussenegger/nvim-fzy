@@ -245,7 +245,7 @@ end
 
 function M.pick_one(items, prompt, label_fn, cb)
   label_fn = label_fn or vim.inspect
-  local num_digits = math.floor(math.log(math.abs(#items)) + 1)
+  local num_digits = math.floor(math.log(math.abs(#items), 10) + 1)
   local digit_fmt = '%0' .. tostring(num_digits) .. 'd'
   local inputs = vfn.tempname()
   vfn.system(string.format('mkfifo "%s"', inputs))
