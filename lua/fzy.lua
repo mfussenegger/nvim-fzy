@@ -1,9 +1,19 @@
 local api = vim.api
 local vfn = vim.fn
+local protocol = vim.lsp.protocol
 local M = {}
 
 local function fst(xs)
   return xs and xs[1] or nil
+end
+
+
+local function list_reverse(xs)
+  local result = {}
+  for i = #xs, 1, -1 do
+    table.insert(result, xs[i])
+  end
+  return result
 end
 
 
@@ -140,19 +150,47 @@ function M.actions.lsp_tags()
     end
     local items = {}
     local add_items = nil
-    add_items = function(xs)
+    add_items = function(xs, parent)
       for _, x in ipairs(xs) do
+        x.__parent = parent
         table.insert(items, x)
         if x.children then
-          add_items(x.children)
+          add_items(x.children, x)
         end
+      end
+    end
+    local num_root_primitives = 0
+    for _, x in pairs(result) do
+      -- 6 is Method, the first kind that is not a container
+      -- (File = 1; Module = 2; Namespace = 3; Package = 4; Class = 5;)
+      if x.kind >= 6 then
+        num_root_primitives = num_root_primitives + 1
       end
     end
     add_items(result)
     M.pick_one(
       items,
       'Tags> ',
-      function(item) return string.format('[%s] %s', vim.lsp.protocol.SymbolKind[item.kind], item.name) end,
+      function(item)
+        local path = {}
+        local parent = item.__parent
+        while parent do
+          table.insert(path, parent.name)
+          parent = parent.__parent
+        end
+        local kind = protocol.SymbolKind[item.kind]
+        -- Omit the root if there are no non-container symbols on root level
+        -- This is for example the case in Java where everything is inside a class
+        -- In that case the class name is mostly noise
+        if num_root_primitives == 0 and next(path) then
+          table.remove(path, #path)
+        end
+        if next(path) then
+          return string.format('[%s] %s: %s', kind, table.concat(list_reverse(path), ' » '), item.name)
+        else
+          return string.format('[%s] %s', kind, item.name)
+        end
+      end,
       function(item)
         if not item then return end
         local range = item.range or item.location.range
