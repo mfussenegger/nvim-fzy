@@ -48,6 +48,17 @@ function sinks.edit_file(selection)
 end
 
 
+function sinks.edit_live_grep(selection)
+  -- fzy returns search input if zero results found. This case is mapped to nil as well.
+  selection = string.match(selection, ".+:%d+:.+")
+  if selection then
+    local parts = vim.split(selection, ":")
+    local path, line = parts[1], parts[2]
+    vim.cmd("e +" .. line .. " " .. path)
+  end
+end
+
+
 -- Return a formatted path or name for a bufnr
 function M.format_bufname(bufnr)
   return vfn.fnamemodify(api.nvim_buf_get_name(bufnr), ':.')
