@@ -24,7 +24,7 @@ nnoremap <silent><leader>ft :lua fzy.try(fzy.actions.lsp_tags, fzy.actions.buf_t
 nnoremap <silent><leader>fg :lua fzy.execute('git ls-files', fzy.sinks.edit_file)<CR>
 nnoremap <silent><leader>fq :lua fzy.actions.quickfix()<CR>
 nnoremap <silent><leader>f/ :lua fzy.actions.buf_lines()<CR>
-nnoremap <silent><leader>fl :lua fzy.execute('ag --nobreak --noheading .', fzy.sinks.edit_file)<CR>
+nnoremap <silent><leader>fl :lua fzy.execute('ag --nobreak --noheading .', fzy.sinks.edit_live_grep)<CR>
 ```
 
 
