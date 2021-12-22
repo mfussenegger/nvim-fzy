@@ -99,7 +99,7 @@ try(...)                                                             *fzy.try()*
       no LSP client/server is available - it falls back to ctags.
 
 
-sinks.edit_file                                           *fzy.sinks.edit_file*
+sinks.edit_file                                            *fzy.sinks.edit_file*
 
 
       A callback that can be used with |fzy.execute()|. It invokes `:e` on the
@@ -109,3 +109,20 @@ sinks.edit_file                                           *fzy.sinks.edit_file*
       >
           fzy.execute('git ls-files', fzy.sinks.edit_file)
 
+
+sinks.edit_live_grep                                  *fzy.sinks.edit_live_grep*
+
+
+      A callback that can be used with |fzy.execute()|. It parses the live
+      grep selection and invokes `:e +line-number` on the filename. The
+      selection format should have the following format:
+
+      {filename}:{line-number}:{search-preview}
+
+      Example usage with `ag`:
+      >
+          fzy.execute('ag --nobreak --noheading .', fzy.sinks.edit_live_grep)
+<
+      Example usage with `rg`:
+      >
+          fzy.execute('rg --no-heading --trim -nH .', fzy.sinks.edit_live_grep)
