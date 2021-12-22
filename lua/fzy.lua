@@ -273,7 +273,7 @@ function M.pick_one(items, prompt, label_fn, cb)
       if not selection or vim.trim(selection) == '' then
         cb(nil)
       else
-        local parts = vim.split(selection, ' ¦ ')
+        local parts = vim.split(selection, '│ ')
         local idx = tonumber(parts[1])
         cb(items[idx], idx)
       end
@@ -283,7 +283,7 @@ function M.pick_one(items, prompt, label_fn, cb)
   vim.cmd('startinsert!')
   local f = io.open(inputs, 'a')
   for i, item in ipairs(items) do
-    local label = string.format(digit_fmt .. ' ¦ %s', i, label_fn(item))
+    local label = string.format(digit_fmt .. '│ %s', i, label_fn(item))
     f:write(label .. '\n')
   end
   f:flush()
