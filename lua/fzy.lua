@@ -283,6 +283,8 @@ end
 
 function M.pick_one(items, prompt, label_fn, cb)
   label_fn = label_fn or vim.inspect
+  -- A reverse lookup from labeled items to original items
+  local labeled_items = {}
   local inputs = vfn.tempname()
   vfn.system(string.format('mkfifo "%s"', inputs))
   M.execute(
@@ -291,10 +293,13 @@ function M.pick_one(items, prompt, label_fn, cb)
       os.remove(inputs)
       if not selection or vim.trim(selection) == '' then
         cb(nil)
-      else
+      elseif M.opts.number_items ~= false then
         local parts = vim.split(selection, '│ ')
         local idx = tonumber(parts[1])
         cb(items[idx], idx)
+      else
+        local sel = vim.trim(selection)
+        cb(labeled_items[sel])
       end
     end,
     prompt
@@ -309,7 +314,11 @@ function M.pick_one(items, prompt, label_fn, cb)
       f:write(label .. '\n')
     end
   else
-    f:write(table.concat(vim.tbl_map(label_fn, items), "\n"))
+    for _, item in ipairs(items) do
+      local label = label_fn(item)
+      labeled_items[label] = item
+    end
+    f:write(table.concat(vim.tbl_keys(labeled_items), "\n"))
   end
   f:flush()
   f:close()
