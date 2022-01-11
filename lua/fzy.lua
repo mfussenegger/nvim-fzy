@@ -3,6 +3,9 @@ local vfn = vim.fn
 local protocol = vim.lsp.protocol
 local M = {}
 
+M.opts = {}
+
+
 local function fst(xs)
   return xs and xs[1] or nil
 end
@@ -23,17 +26,24 @@ local function popup()
   api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
   local columns = api.nvim_get_option('columns')
   local lines = api.nvim_get_option('lines')
-  local width = math.floor(columns * 0.9)
-  local height = math.floor(lines * 0.8)
-  local opts = {
-    relative = 'editor',
-    style = 'minimal',
-    row = math.floor((lines - height) * 0.5),
-    col = math.floor((columns - width) * 0.5),
-    width = width,
-    height = height,
-    border = 'single',
-  }
+  local opts
+  if type(M.opts.popup_opts) == "table" then
+    opts = M.opts.popup_opts
+  elseif type(M.opts.popup_opts) == "function" then
+    opts = M.opts.popup_opts(lines, columns)
+  else
+    local width = math.floor(columns * 0.9)
+    local height = math.floor(lines * 0.8)
+    opts = {
+      relative = 'editor',
+      style = 'minimal',
+      row = math.floor((lines - height) * 0.5),
+      col = math.floor((columns - width) * 0.5),
+      width = width,
+      height = height,
+      border = 'single',
+    }
+  end
   local win = api.nvim_open_win(buf, true, opts)
   return win, buf, opts
 end
@@ -273,8 +283,6 @@ end
 
 function M.pick_one(items, prompt, label_fn, cb)
   label_fn = label_fn or vim.inspect
-  local num_digits = math.floor(math.log(math.abs(#items), 10) + 1)
-  local digit_fmt = '%0' .. tostring(num_digits) .. 'd'
   local inputs = vfn.tempname()
   vfn.system(string.format('mkfifo "%s"', inputs))
   M.execute(
@@ -293,9 +301,15 @@ function M.pick_one(items, prompt, label_fn, cb)
   )
   vim.cmd('startinsert!')
   local f = io.open(inputs, 'a')
-  for i, item in ipairs(items) do
-    local label = string.format(digit_fmt .. '│ %s', i, label_fn(item))
-    f:write(label .. '\n')
+  if M.opts.number_items ~= false then
+    local num_digits = math.floor(math.log(math.abs(#items), 10) + 1)
+    local digit_fmt = '%0' .. tostring(num_digits) .. 'd'
+    for i, item in ipairs(items) do
+      local label = string.format(digit_fmt .. '│ %s', i, label_fn(item))
+      f:write(label .. '\n')
+    end
+  else
+    f:write(table.concat(vim.tbl_map(label_fn, items), "\n"))
   end
   f:flush()
   f:close()
@@ -307,9 +321,10 @@ function M.execute(choices_cmd, on_selection, prompt)
   local shell = api.nvim_get_option('shell')
   local shellcmdflag = api.nvim_get_option('shellcmdflag')
   local popup_win, _, popup_opts = popup()
+  local fzy_opts = M.opts.fzy_opts or ""
   local fzy = (prompt
-    and string.format('%s | fzy -l %d -p "%s" > "%s"', choices_cmd, popup_opts.height, prompt, tmpfile)
-    or string.format('%s | fzy -l %d > "%s"', choices_cmd, popup_opts.height, tmpfile)
+    and string.format('%s | fzy %s -l %d -p "%s" > "%s"', choices_cmd, fzy_opts, popup_opts.height, prompt, tmpfile)
+    or string.format('%s | fzy %s -l %d > "%s"', choices_cmd, fzy_opts, popup_opts.height, tmpfile)
   )
   local args = {shell, shellcmdflag, fzy}
   vfn.termopen(args, {
