@@ -1,6 +1,5 @@
 local api = vim.api
 local vfn = vim.fn
-local protocol = vim.lsp.protocol
 local M = {}
 
 local function fst(xs)
@@ -189,7 +188,7 @@ function M.actions.lsp_tags()
           table.insert(path, parent.name)
           parent = parent.__parent
         end
-        local kind = protocol.SymbolKind[item.kind]
+        local kind = vim.lsp.protocol.SymbolKind[item.kind]
         -- Omit the root if there are no non-container symbols on root level
         -- This is for example the case in Java where everything is inside a class
         -- In that case the class name is mostly noise
