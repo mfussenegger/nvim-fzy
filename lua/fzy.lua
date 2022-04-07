@@ -270,6 +270,15 @@ function M.actions.quickfix()
 end
 
 
+local function enter_insert()
+  local esc = api.nvim_replace_termcodes('<ESC>', true, false, true)
+  api.nvim_feedkeys(esc, 'n', false)
+  vim.schedule(function()
+    vim.cmd('startinsert!')
+  end)
+end
+
+
 function M.pick_one(items, prompt, label_fn, cb)
   label_fn = label_fn or vim.inspect
   local num_digits = math.floor(math.log(math.abs(#items), 10) + 1)
@@ -290,7 +299,8 @@ function M.pick_one(items, prompt, label_fn, cb)
     end,
     prompt
   )
-  vim.cmd('startinsert!')
+
+  enter_insert()
   local f = io.open(inputs, 'a')
   for i, item in ipairs(items) do
     local label = string.format(digit_fmt .. '│ %s', i, label_fn(item))
@@ -326,7 +336,7 @@ function M.execute(choices_cmd, on_selection, prompt)
       end
     end;
   })
-  vim.cmd('startinsert!')
+  enter_insert()
 end
 
 
