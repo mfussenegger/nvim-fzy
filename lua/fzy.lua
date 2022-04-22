@@ -16,7 +16,7 @@ local function list_reverse(xs)
 end
 
 
-local function popup()
+function M.new_popup()
   local buf = api.nvim_create_buf(false, true)
   api.nvim_buf_set_keymap(buf, 't', '<ESC>', '<C-\\><C-c>', {})
   api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
@@ -34,7 +34,7 @@ local function popup()
     border = 'single',
   }
   local win = api.nvim_open_win(buf, true, opts)
-  return win, buf, opts
+  return win, buf
 end
 
 
@@ -315,10 +315,11 @@ function M.execute(choices_cmd, on_selection, prompt)
   local tmpfile = vfn.tempname()
   local shell = api.nvim_get_option('shell')
   local shellcmdflag = api.nvim_get_option('shellcmdflag')
-  local popup_win, _, popup_opts = popup()
+  local popup_win, _ = M.new_popup()
+  local height = api.nvim_win_get_height(popup_win)
   local fzy = (prompt
-    and string.format('%s | fzy -l %d -p "%s" > "%s"', choices_cmd, popup_opts.height, prompt, tmpfile)
-    or string.format('%s | fzy -l %d > "%s"', choices_cmd, popup_opts.height, tmpfile)
+    and string.format('%s | fzy -l %d -p "%s" > "%s"', choices_cmd, height, prompt, tmpfile)
+    or string.format('%s | fzy -l %d > "%s"', choices_cmd, height, tmpfile)
   )
   local args = {shell, shellcmdflag, fzy}
   vfn.termopen(args, {

@@ -126,3 +126,12 @@ sinks.edit_live_grep                                  *fzy.sinks.edit_live_grep*
       Example usage with `rg`:
       >
           fzy.execute('rg --no-heading --trim -nH .', fzy.sinks.edit_live_grep)
+
+
+new_popup                                                        *fzy.new_popup*
+
+      Function used to create the buffer and window to host the `fzy`
+      execution. You can override this for customization.
+
+      The function is required to return the window number and the buffer
+      number.
