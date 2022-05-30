@@ -152,7 +152,7 @@ function M.actions.lsp_tags()
   params.context = {
     includeDeclaration = true
   }
-  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
+  assert(next(vim.lsp.buf_get_clients()), "Must have a client running to use lsp_tags")
   vim.lsp.buf_request(0, 'textDocument/documentSymbol', params, function(err, result)
     assert(not err, vim.inspect(err))
     if not result then
