@@ -302,6 +302,10 @@ function M.pick_one(items, prompt, label_fn, cb)
 
   enter_insert()
   local f = io.open(inputs, 'a')
+  if not f then
+    vim.notify('Could not open tempfile', vim.log.levels.ERROR)
+    return
+  end
   for i, item in ipairs(items) do
     local label = string.format(digit_fmt .. '│ %s', i, label_fn(item))
     f:write(label .. '\n')
