@@ -285,6 +285,14 @@ function M.pick_one(items, prompt, label_fn, cb)
   local digit_fmt = '%0' .. tostring(num_digits) .. 'd'
   local inputs = vfn.tempname()
   vfn.system(string.format('mkfifo "%s"', inputs))
+  local co
+  if cb == nil then
+    co = coroutine.running()
+    assert(co, "If callback is nil the function must run in a coroutine")
+    cb = function(choice, idx)
+      coroutine.resume(co, choice, idx)
+    end
+  end
   M.execute(
     string.format('cat "%s"', inputs),
     function(selection)
@@ -312,6 +320,9 @@ function M.pick_one(items, prompt, label_fn, cb)
   end
   f:flush()
   f:close()
+  if co then
+    return coroutine.yield()
+  end
 end
 
 
@@ -348,7 +359,7 @@ end
 function M.setup()
   if vim.ui then
     function vim.ui.select(items, opts, on_choice)  -- luacheck: ignore 122
-      M.pick_one(items, opts.prompt, opts.format_item, on_choice)
+      return M.pick_one(items, opts.prompt, opts.format_item, on_choice)
     end
   end
 end
