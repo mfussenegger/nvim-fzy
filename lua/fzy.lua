@@ -270,15 +270,6 @@ function M.actions.quickfix()
 end
 
 
-local function enter_insert()
-  local esc = api.nvim_replace_termcodes('<ESC>', true, false, true)
-  api.nvim_feedkeys(esc, 'n', false)
-  vim.schedule(function()
-    vim.cmd('startinsert!')
-  end)
-end
-
-
 function M.pick_one(items, prompt, label_fn, cb)
   label_fn = label_fn or vim.inspect
   local num_digits = math.floor(math.log(math.abs(#items), 10) + 1)
@@ -329,7 +320,7 @@ function M.execute(choices_cmd, on_selection, prompt)
   local tmpfile = vfn.tempname()
   local shell = api.nvim_get_option('shell')
   local shellcmdflag = api.nvim_get_option('shellcmdflag')
-  local popup_win, _ = M.new_popup()
+  local popup_win, buf = M.new_popup()
   local height = api.nvim_win_get_height(popup_win)
   local fzy = (prompt
     and string.format('%s | fzy -l %d -p "%s" > "%s"', choices_cmd, height, prompt, tmpfile)
@@ -351,7 +342,7 @@ function M.execute(choices_cmd, on_selection, prompt)
       end
     end;
   })
-  enter_insert()
+  api.nvim_buf_call(buf, function() vim.cmd('startinsert!') end)
 end
 
 
