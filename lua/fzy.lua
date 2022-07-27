@@ -293,6 +293,7 @@ function M.pick_one(items, prompt, label_fn, cb)
       coroutine.resume(co, choice, idx)
     end
   end
+
   M.execute(
     string.format('cat "%s"', inputs),
     function(selection)
@@ -307,8 +308,6 @@ function M.pick_one(items, prompt, label_fn, cb)
     end,
     prompt
   )
-
-  enter_insert()
   local f = io.open(inputs, 'a')
   if not f then
     vim.notify('Could not open tempfile', vim.log.levels.ERROR)
