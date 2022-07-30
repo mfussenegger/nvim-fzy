@@ -331,15 +331,25 @@ function M.execute(choices_cmd, on_selection, prompt)
     on_exit = function()
       -- popup could already be gone if user closes it manually; Ignore that case
       pcall(api.nvim_win_close, popup_win, true)
+      local contents = nil
       local file = io.open(tmpfile)
       if file then
-        local contents = file:read("*all")
+        contents = file:read("*all")
         file:close()
         os.remove(tmpfile)
-        on_selection(contents)
-      else
-        on_selection(nil)
       end
+
+      -- After on_exit there will be a terminal related cmdline update that would
+      -- override any messages printed by the `on_selection` callback.
+      -- The timer+schedule combo ensures users see messages printed within the callback
+      local timer = vim.loop.new_timer()
+      timer:start(0, 0, function()
+        timer:stop()
+        timer:close()
+        vim.schedule(function()
+          on_selection(contents)
+        end)
+      end)
     end;
   })
   api.nvim_buf_call(buf, function() vim.cmd('startinsert!') end)
