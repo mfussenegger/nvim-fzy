@@ -173,11 +173,37 @@ function M.actions.tagstack()
 end
 
 
-function M.actions.lsp_tags()
+function M.actions.lsp_tags(opts)
+  opts = opts or {}
   local params = vim.lsp.util.make_position_params()
   params.context = {
     includeDeclaration = true
   }
+  local function kind_matches(symbol)
+    if opts.kind == nil then
+      return true
+    end
+    for _, kind in pairs(opts.kind) do
+      if symbol.kind == vim.lsp.protocol.SymbolKind[kind] then
+        return true
+      end
+    end
+    return false
+  end
+  local lnum = api.nvim_win_get_cursor(0)[1] - 1
+  local function include(symbol)
+    if kind_matches(symbol) then
+      local range = symbol.range or symbol.location.range
+      if opts.mode == 'next' then
+        return range.start.line > lnum
+      elseif opts.mode == 'prev' then
+        return range.start.line < lnum
+      else
+        return true
+      end
+    end
+    return false
+  end
   assert(next(vim.lsp.buf_get_clients()), "Must have a client running to use lsp_tags")
   vim.lsp.buf_request(0, 'textDocument/documentSymbol', params, function(err, result)
     assert(not err, vim.inspect(err))
@@ -189,7 +215,9 @@ function M.actions.lsp_tags()
     add_items = function(xs, parent)
       for _, x in ipairs(xs) do
         x.__parent = parent
-        table.insert(items, x)
+        if include(x) then
+          table.insert(items, x)
+        end
         if x.children then
           add_items(x.children, x)
         end
