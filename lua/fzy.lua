@@ -343,6 +343,9 @@ end
 
 
 function M.execute(choices_cmd, on_selection, prompt)
+  if api.nvim_get_mode().mode ~= 'n' then
+    api.nvim_feedkeys(api.nvim_replace_termcodes('<ESC>', true, false, true), 'n', false)
+  end
   local tmpfile = vfn.tempname()
   local shell = api.nvim_get_option('shell')
   local shellcmdflag = api.nvim_get_option('shellcmdflag')
@@ -378,7 +381,9 @@ function M.execute(choices_cmd, on_selection, prompt)
       end)
     end;
   })
-  api.nvim_buf_call(buf, function() vim.cmd('startinsert!') end)
+  api.nvim_buf_call(buf, function()
+    vim.cmd('startinsert!')
+  end)
 end
 
 
