@@ -370,8 +370,16 @@ function M.pick_one(items, prompt, label_fn, cb)
 end
 
 
+local leave_modes = {
+  v = true,
+  vs = true,
+  V = true,
+  i = true,
+}
+
+
 function M.execute(choices_cmd, on_selection, prompt)
-  if api.nvim_get_mode().mode ~= 'n' then
+  if leave_modes[api.nvim_get_mode().mode] then
     api.nvim_feedkeys(api.nvim_replace_termcodes('<ESC>', true, false, true), 'n', false)
   end
   local tmpfile = vfn.tempname()
