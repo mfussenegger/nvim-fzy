@@ -391,6 +391,10 @@ function M.execute(choices_cmd, on_selection, prompt)
     and string.format('%s | fzy -l %d -p "%s" > "%s"', choices_cmd, height, prompt, tmpfile)
     or string.format('%s | fzy -l %d > "%s"', choices_cmd, height, tmpfile)
   )
+  api.nvim_create_autocmd({'TermOpen', 'BufEnter'}, {
+    buffer = buf,
+    command = 'startinsert!',
+  })
   local args = {shell, shellcmdflag, fzy}
   vfn.termopen(args, {
     on_exit = function()
@@ -417,9 +421,6 @@ function M.execute(choices_cmd, on_selection, prompt)
       end)
     end;
   })
-  api.nvim_buf_call(buf, function()
-    vim.cmd('startinsert!')
-  end)
 end
 
 
