@@ -317,7 +317,10 @@ function M.actions.quickfix()
       if not item then return end
       vfn.bufload(item.bufnr)
       api.nvim_win_set_buf(0, item.bufnr)
-      api.nvim_win_set_cursor(0, {item.lnum, item.col - 1})
+      local ok = pcall(api.nvim_win_set_cursor, 0, {item.lnum, item.col - 1})
+      if not ok then
+        api.nvim_win_set_cursor(0, {item.lnum, 0})
+      end
       vim.cmd('normal! zvzz')
     end
   )
@@ -370,17 +373,9 @@ function M.pick_one(items, prompt, label_fn, cb)
 end
 
 
-local leave_modes = {
-  v = true,
-  vs = true,
-  V = true,
-  i = true,
-}
-
-
 function M.execute(choices_cmd, on_selection, prompt)
-  if leave_modes[api.nvim_get_mode().mode] then
-    api.nvim_feedkeys(api.nvim_replace_termcodes('<ESC>', true, false, true), 'n', false)
+  if api.nvim_get_mode().mode == "i" then
+    vim.cmd('stopinsert')
   end
   local tmpfile = vfn.tempname()
   local shell = api.nvim_get_option('shell')
@@ -394,6 +389,7 @@ function M.execute(choices_cmd, on_selection, prompt)
   api.nvim_create_autocmd({'TermOpen', 'BufEnter'}, {
     buffer = buf,
     command = 'startinsert!',
+    once = true,
   })
   local args = {shell, shellcmdflag, fzy}
   vfn.termopen(args, {
