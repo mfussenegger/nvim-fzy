@@ -190,7 +190,8 @@ function M.actions.lsp_tags(opts)
     end
     return false
   end
-  local lnum = api.nvim_win_get_cursor(0)[1] - 1
+  local win = api.nvim_get_current_win()
+  local lnum = api.nvim_win_get_cursor(win)[1] - 1
   local function include(symbol)
     if kind_matches(symbol) then
       local range = symbol.range or symbol.location.range
@@ -258,7 +259,7 @@ function M.actions.lsp_tags(opts)
       function(item)
         if not item then return end
         local range = item.range or item.location.range
-        api.nvim_win_set_cursor(0, {
+        api.nvim_win_set_cursor(win, {
           range.start.line + 1,
           range.start.character
         })
