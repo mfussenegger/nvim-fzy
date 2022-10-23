@@ -118,6 +118,7 @@ end
 
 
 function M.actions.jumplist()
+  vim.notify_once('fzy.actions.jumplist will be removed. Use the nvim-qwahl plugin', vim.log.levels.WARN)
   local locations = vim.tbl_filter(
     function(loc) return api.nvim_buf_is_valid(loc.bufnr) end,
     vim.fn.getjumplist()[1]
@@ -159,6 +160,7 @@ end
 
 
 function M.actions.tagstack()
+  vim.notify_once('fzy.actions.tagstack will be removed. Use the nvim-qwahl plugin', vim.log.levels.WARN)
   local stack = vim.fn.gettagstack()
   M.pick_one(
     stack.items or {},
