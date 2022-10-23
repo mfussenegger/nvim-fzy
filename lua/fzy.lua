@@ -78,6 +78,7 @@ M.actions = {}
 
 
 function M.actions.buf_lines()
+  vim.notify_once('fzy.actions.buf_lines will be removed. Use the nvim-qwahl plugin', vim.log.levels.WARN)
   local lines = api.nvim_buf_get_lines(0, 0, -1, true)
   local win = api.nvim_get_current_win()
   M.pick_one(lines, 'Lines> ', function(x) return x end, function(result, idx)
@@ -90,6 +91,7 @@ end
 
 
 function M.actions.buffers()
+  vim.notify_once('fzy.actions.buffers will be removed. Use the nvim-qwahl plugin', vim.log.levels.WARN)
   local bufs = vim.tbl_filter(
     function(b)
       return api.nvim_buf_is_loaded(b) and api.nvim_buf_get_option(b, 'buftype') ~= 'quickfix'
@@ -174,6 +176,7 @@ end
 
 
 function M.actions.lsp_tags(opts)
+  vim.notify_once('fzy.actions.lsp_tags will be removed. Use the nvim-qwahl plugin', vim.log.levels.WARN)
   opts = opts or {}
   local params = vim.lsp.util.make_position_params()
   params.context = {
@@ -270,6 +273,7 @@ function M.actions.lsp_tags(opts)
 end
 
 function M.actions.buf_tags()
+  vim.notify_once('fzy.actions.buf_tags will be removed use the nvim-qwahl plugin', vim.log.levels.WARN)
   local bufname = api.nvim_buf_get_name(0)
   assert(vfn.filereadable(bufname), 'File to generate tags for must be readable')
   local ok, output = pcall(vfn.system, {
@@ -306,6 +310,7 @@ end
 
 
 function M.actions.quickfix()
+  vim.notify_once('fzy.actions.quickfix will be removed. Use the nvim-qwahl plugin', vim.log.levels.WARN)
   vim.cmd('cclose')
   local items = vfn.getqflist()
   M.pick_one(
@@ -422,11 +427,10 @@ end
 
 
 function M.setup()
-  if vim.ui then
-    function vim.ui.select(items, opts, on_choice)  -- luacheck: ignore 122
-      return M.pick_one(items, opts.prompt, opts.format_item, on_choice)
-    end
-  end
+  vim.notify_once(
+    'fzy.setup() became a no-op, fzy now registers itself as vim.ui.select provider by default',
+    vim.log.levels.WARN
+  )
 end
 
 return M
