@@ -1,9 +1,9 @@
 *fzy.txt* Neovim frontend for the fzy fuzzy finder
 
-nvim-fzy provides a few methods to switch to files, buffers or search tags
-using the fzy fuzzy finder.
+nvim-fzy provides an implementation for vim.ui.select and a method to pipe the
+output of an executable to `fzy`.
 
-It also provides a Lua API to easily customize sources and actions.
+It's best used with picker implementations from nvim-qwahl.
 
 
 
@@ -46,57 +46,6 @@ pick_one({items}, {prompt}, {label_fn}, {cb})                    *fzy.pick_one()
                       render the item.
           {cb}        Callback that will be invoked with the choice, or `nil`
                       if the user aborted.
-
-
-setup()                                                            *fzy.setup()*
-
-      Changes `vim.ui.select` to use fzy. Requires Neovim 0.6+
-
-
-actions.buffers()                                        *fzy.actions.buffers()*
-
-      Prompts the user with all loaded buffers, once a choice is made the
-      selected buffer will be opened in the current buffer.
-
-
-actions.buf_tags()                                      *fzy.actions.buf_ctags()*
-
-
-      Runs ctags on the current buffer and prompts the user with all generated
-      tags. Once a choice is made it will navigate to the chosen tag.
-
-
-actions.lsp_tags()                                      *fzy.actions.lsp_tags()*
-
-      Retrieves tags for the current buffer using the built-in LSP client.
-      Navigates to the selected symbol.
-
-
-actions.quickfix()                                      *fzy.actions.quickfix()*
-
-      Opens the items from the quickfix list.
-      Navigates to the selected item.
-
-
-actions.jumplist()                                      *fzy.actions.jumplist()*
-
-      Lists the buffers from the jumplist.
-      On selection it navigates to the selected buffer.
-
-
-actions.tagstack()                                      *fzy.actions.tagstack()*
-
-      Lists the buffers from the tagstack.
-      On selection it navigates to the selected item.
-
-
-try(...)                                                             *fzy.try()*
-
-      Takes a list of function references and invokes them until the first succeeds.
-
-      An example use case is `fzy.try(fzy.actions.lsp_tags, fzy.actions.buf_tags)`
-      It first tries to use `lsp_tags`, but if it fails - for example because
-      no LSP client/server is available - it falls back to ctags.
 
 
 sinks.edit_file                                            *fzy.sinks.edit_file*
