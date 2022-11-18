@@ -100,10 +100,23 @@ function M.execute(choices_cmd, on_selection, prompt)
   local shellcmdflag = api.nvim_get_option('shellcmdflag')
   local popup_win, buf = M.new_popup()
   local height = api.nvim_win_get_height(popup_win)
-  local fzy = (prompt
-    and string.format('%s | fzy -l %d -p "%s" > "%s"', choices_cmd, height, prompt, tmpfile)
-    or string.format('%s | fzy -l %d > "%s"', choices_cmd, height, tmpfile)
-  )
+  local fzy
+  if prompt then
+    fzy = string.format(
+      '%s | fzy -l %d -p %s > "%s"',
+      choices_cmd,
+      height,
+      vim.fn.shellescape(prompt),
+      tmpfile
+    )
+  else
+    fzy = string.format(
+      '%s | fzy -l %d > "%s"',
+      choices_cmd,
+      height,
+      tmpfile
+    )
+  end
   api.nvim_create_autocmd({'TermOpen', 'BufEnter'}, {
     buffer = buf,
     command = 'startinsert!',
