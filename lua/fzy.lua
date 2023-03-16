@@ -139,13 +139,17 @@ function M.execute(choices_cmd, on_selection, prompt)
       -- override any messages printed by the `on_selection` callback.
       -- The timer+schedule combo ensures users see messages printed within the callback
       local timer = vim.loop.new_timer()
-      timer:start(0, 0, function()
-        timer:stop()
-        timer:close()
-        vim.schedule(function()
-          on_selection(contents)
+      if timer then
+        timer:start(0, 0, function()
+          timer:stop()
+          timer:close()
+          vim.schedule(function()
+            on_selection(contents)
+          end)
         end)
-      end)
+      else
+        on_selection(contents)
+      end
     end;
   })
 end
