@@ -1,6 +1,49 @@
+---@brief [[
+--- Neovim integration for the `fzy` fuzzy finder
+---
+--- nvim-fzy provides an implementation for |vim.ui.select()| and a
+--- |fzy.execute()| function to run arbitrary commands and select one entry from the output.
+---
+---@brief ]]
+
+---@mod fzy
+
+
 local api = vim.api
 local vfn = vim.fn
 local M = {}
+
+
+--- Generate the `fzy` shell command.
+---
+--- `opts.prompt` if present is already shell escaped.
+---
+--- Must return a command as string that:
+---   - Receives choices as newline delimited strings via stdin
+---   - Returns the selection via stdout.
+---
+--- Examples:
+---
+--- <pre>
+--- fzy.command({ height = 20 })
+--- -- Result: fzy -l 20
+--- </pre>
+---
+--- <pre>
+--- fzy.command({ height = 20, prompt = "'Tag: '" })
+--- -- Result: fzy -l 20 -p 'Tag: '
+--- </pre>
+---
+---@param opts {height: integer, prompt?: string}
+---@return string
+function M.command(opts)
+  local prompt = opts.prompt
+  if prompt then
+    return string.format("fzy -l %d -p %s", opts.height, prompt)
+  else
+    return string.format("fzy -l %d", opts.height)
+  end
+end
 
 
 --- Create a floating window and a buffer
@@ -117,23 +160,9 @@ function M.execute(choices_cmd, on_choice, prompt)
   local shellcmdflag = api.nvim_get_option('shellcmdflag')
   local popup_win, buf = M.new_popup()
   local height = api.nvim_win_get_height(popup_win)
-  local fzy
-  if prompt then
-    fzy = string.format(
-      '%s | fzy -l %d -p %s > "%s"',
-      choices_cmd,
-      height,
-      vim.fn.shellescape(prompt),
-      tmpfile
-    )
-  else
-    fzy = string.format(
-      '%s | fzy -l %d > "%s"',
-      choices_cmd,
-      height,
-      tmpfile
-    )
-  end
+  prompt = prompt and vim.fn.shellescape(prompt) or nil
+  local cmd = M.command({ height = height, prompt = prompt })
+  local fzy = string.format('%s | %s > "%s"', choices_cmd, cmd, tmpfile)
   api.nvim_create_autocmd({'TermOpen', 'BufEnter'}, {
     buffer = buf,
     command = 'startinsert!',
