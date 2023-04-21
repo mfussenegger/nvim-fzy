@@ -3,6 +3,10 @@ local vfn = vim.fn
 local M = {}
 
 
+--- Create a floating window and a buffer
+--- The buffer is used to run the fzy terminal
+---
+---@return integer win, integer buf
 function M.new_popup()
   local buf = api.nvim_create_buf(false, true)
   api.nvim_buf_set_keymap(buf, 't', '<ESC>', '<C-\\><C-c>', {})
@@ -45,17 +49,24 @@ function sinks.edit_live_grep(selection)
 end
 
 
-function M.pick_one(items, prompt, label_fn, cb)
+--- Show a prompt to the user to pick on of many items
+---
+---@generic T
+---@param items T[]
+---@param prompt? string
+---@param label_fn? fun(item: T): string
+---@param on_choice fun(choice?: T, idx?: integer)
+function M.pick_one(items, prompt, label_fn, on_choice)
   label_fn = label_fn or vim.inspect
   local num_digits = math.floor(math.log(math.abs(#items), 10) + 1)
   local digit_fmt = '%0' .. tostring(num_digits) .. 'd'
   local inputs = vfn.tempname()
   vfn.system(string.format('mkfifo "%s"', inputs))
   local co
-  if cb == nil then
+  if on_choice == nil then
     co = coroutine.running()
     assert(co, "If callback is nil the function must run in a coroutine")
-    cb = function(choice, idx)
+    on_choice = function(choice, idx)
       coroutine.resume(co, choice, idx)
     end
   end
@@ -65,11 +76,11 @@ function M.pick_one(items, prompt, label_fn, cb)
     function(selection)
       os.remove(inputs)
       if not selection or vim.trim(selection) == '' then
-        cb(nil)
+        on_choice(nil)
       else
         local parts = vim.split(selection, '│ ')
         local idx = tonumber(parts[1])
-        cb(items[idx], idx)
+        on_choice(items[idx], idx)
       end
     end,
     prompt
@@ -91,7 +102,13 @@ function M.pick_one(items, prompt, label_fn, cb)
 end
 
 
-function M.execute(choices_cmd, on_selection, prompt)
+--- Execute `choices_cmd` in a shell and pipes the result to fzy,
+--- prompting the user for a choice.
+---
+---@param choices_cmd string command that generates the choices
+---@param on_choice fun(choice?: string) called when the user selected an entry
+---@param prompt? string
+function M.execute(choices_cmd, on_choice, prompt)
   if api.nvim_get_mode().mode == "i" then
     vim.cmd('stopinsert')
   end
@@ -127,16 +144,16 @@ function M.execute(choices_cmd, on_selection, prompt)
     on_exit = function()
       -- popup could already be gone if user closes it manually; Ignore that case
       pcall(api.nvim_win_close, popup_win, true)
-      local contents = nil
+      local choice = nil
       local file = io.open(tmpfile)
       if file then
-        contents = file:read("*all")
+        choice = file:read("*all")
         file:close()
         os.remove(tmpfile)
       end
 
       -- After on_exit there will be a terminal related cmdline update that would
-      -- override any messages printed by the `on_selection` callback.
+      -- override any messages printed by the `on_choice` callback.
       -- The timer+schedule combo ensures users see messages printed within the callback
       local timer = vim.loop.new_timer()
       if timer then
@@ -144,11 +161,11 @@ function M.execute(choices_cmd, on_selection, prompt)
           timer:stop()
           timer:close()
           vim.schedule(function()
-            on_selection(contents)
+            on_choice(choice)
           end)
         end)
       else
-        on_selection(contents)
+        on_choice(choice)
       end
     end;
   })
