@@ -33,6 +33,12 @@ To get additional pickers to jump to tags and other stuff, you can use it in com
 
 Enjoy
 
+## Customize
+
+- You can override the `new_pop` function if you want to customize the floating window.
+- You can override the `command` function if you want to customize the `fzy` shell command.
+
+Take a look at the source to see the default implementations.
 
 ## Goals
 
