@@ -157,6 +157,15 @@ function M.execute(choices_cmd, on_choice, prompt)
   end
   local tmpfile = vfn.tempname()
   local popup_win, buf = M.new_popup()
+  api.nvim_create_autocmd("WinLeave", {
+    callback = function()
+      local w = vim.api.nvim_get_current_win()
+      if w == popup_win then
+        api.nvim_buf_delete(buf, { force = true })
+        return true
+      end
+    end,
+  })
   local height = api.nvim_win_get_height(popup_win)
   prompt = prompt and vim.fn.shellescape(prompt) or nil
   local cmd = M.command({ height = height, prompt = prompt })
