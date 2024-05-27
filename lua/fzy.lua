@@ -53,9 +53,9 @@ end
 function M.new_popup()
   local buf = api.nvim_create_buf(false, true)
   api.nvim_buf_set_keymap(buf, 't', '<ESC>', '<C-\\><C-c>', {})
-  api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
-  local columns = api.nvim_get_option('columns')
-  local lines = api.nvim_get_option('lines')
+  vim.bo[buf].bufhidden = "wipe"
+  local columns = vim.o.columns
+  local lines = vim.o.lines
   local width = math.floor(columns * 0.9)
   local height = math.floor(lines * 0.8)
   local opts = {
@@ -156,8 +156,6 @@ function M.execute(choices_cmd, on_choice, prompt)
     vim.cmd('stopinsert')
   end
   local tmpfile = vfn.tempname()
-  local shell = api.nvim_get_option('shell')
-  local shellcmdflag = api.nvim_get_option('shellcmdflag')
   local popup_win, buf = M.new_popup()
   local height = api.nvim_win_get_height(popup_win)
   prompt = prompt and vim.fn.shellescape(prompt) or nil
@@ -168,7 +166,7 @@ function M.execute(choices_cmd, on_choice, prompt)
     command = 'startinsert!',
     once = true,
   })
-  local args = {shell, shellcmdflag, fzy}
+  local args = {vim.o.shell, vim.o.shellcmdflag, fzy}
   vfn.termopen(args, {
     on_exit = function()
       -- popup could already be gone if user closes it manually; Ignore that case
