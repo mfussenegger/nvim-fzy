@@ -75,8 +75,16 @@ end
 local sinks = {}
 M.sinks = sinks
 function sinks.edit_file(selection)
-  if selection and vim.trim(selection) ~= '' then
-    vim.cmd('e ' .. selection)
+  if not selection then
+    return
+  end
+  selection = vim.trim(selection)
+  if selection == "" then
+    return
+  end
+  local ok, err = pcall(vim.cmd.e, selection)
+  if not ok then
+    vim.notify(err, vim.log.levels.WARN)
   end
 end
 
