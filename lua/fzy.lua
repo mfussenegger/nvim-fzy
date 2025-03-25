@@ -65,7 +65,6 @@ function M.new_popup()
     col = math.floor((columns - width) * 0.5),
     width = width,
     height = height,
-    border = 'single',
   }
   local win = api.nvim_open_win(buf, true, opts)
   return win, buf
